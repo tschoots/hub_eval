@@ -1,0 +1,21 @@
+# find max memory
+vboxmanage list systemproperties
+
+vboxmanage list systemproperties | grep "Maximum guest RAM size"
+vboxmanage list systemproperties | grep "Maximum guest CPU count" //this should be devided by 4 i think.
+
+
+#find the current defined memory.
+vboxmanage showvminfo boot2docker-vm
+
+#set the memory and number of cores
+vboxmanage modifyvm "boot2docker-vm" --cpus #cores --memory <max ram> 
+
+vboxmanage modifyvm "boot2docker-vm" --cpus 6 --memory 38840 --vram 17
+
+
+
+# needed to init boot2docker
+set DOCKER_TLS_VERIFY=1
+set DOCKER_HOST=tcp://192.168.59.104:2376
+set DOCKER_CERT_PATH=C:\Users\tschoots\.boot2docker\certs\boot2docker-vm
