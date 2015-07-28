@@ -1,14 +1,15 @@
 #!/bin/bash
 
-_DOCKER_IMAGE="docker.io/blackduckhub/eval:latest"
+# this is a start script for mac to start the BlackDuck hub in a docker container.
+# it assumes boot2docker is already installed.
+# minumum requirement is 8 gb of ram wich will be allocated in the boot2docker-vm
 
-# check available memory
-free_mem_in_gb=$(free -g | grep "Mem" | awk '{print $4;}')
-printf "%sGb free memory.\n" "$free_mem_in_gb"
-if [ "${free_mem_in_gb:-0}" -lt 8 ];then
-    echo "WARNING minimum of 8Gb required."
-    exit
-fi
+_DOCKER_IMAGE="docker.io/blackduckhub/eval:latest"
+_MEMORY="8192
+
+# Set the container memory
+VBoxManage modifyvm boot2docker-vm --memory $_MEMORY
+
 
 # check if there is a ready a container running
 nr_containers=$(docker ps  | grep $_DOCKER_IMAGE | wc -l)
