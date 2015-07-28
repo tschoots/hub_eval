@@ -6,7 +6,8 @@
 
 _DOCKER_IMAGE="docker.io/blackduckhub/eval:latest"
 _MIN_MEM=8192
-_DEFAULT_PORT=8080
+_DEFAULT_PORT=8080  # the default port on the mac host can be manipulated with --port= during startup
+_HUB_PORT=5555      # the port that will be exposed on the boot2docker-vm and connected to port 8080 in the hub docker container , can't manipulate
 
 
 port=$_DEFAULT_PORT
@@ -91,7 +92,7 @@ i=0
 for ip in "${ipAddresses[@]}"
 do
   # make the port forwarding rules to be set in boot2docker-vm
-  r1="VBoxManage modifyvm boot2docker-vm --natpf1 hub${i},tcp,${ip},${port},,${port}"
+  r1="VBoxManage modifyvm boot2docker-vm --natpf1 hub${i},tcp,${ip},${port},,${_HUB_PORT}"
   r2="VBoxManage modifyvm boot2docker-vm --natpf1 hub_console${i},tcp,${ip},7081,,7081"
   echo $r1
   `$r1`
@@ -100,11 +101,22 @@ do
   i+=1
 done
 
+
+# print the urls to use to connect to the hub
+echo  -e "\033[5m \033[4m \033[1murls connect to the dockerized hub : \033[0m"
+declare -a urls=($(VBoxManage showvminfo boot2docker-vm | grep NIC | grep hub | awk '{print "http://" $13 ":"  $17}' | sed 's/,//g'))
+for url in "${urls[@]}"
+do
+   echo $url
+done
+
+
 #start the boot2docker-vm
 boot2docker up
 
 #initialize the shell so docker commands can be performed.
 eval $(boot2docker shellinit)
+
 
 # check if there is a ready a container running
 nr_containers=$(docker ps  | grep $_DOCKER_IMAGE | wc -l)
@@ -143,7 +155,14 @@ fi
 if [ $nr_containers = 0 ]; then
     #no containers started so start the image
     echo "first time image is started"
-    STARTUP_CMD="docker run -t -i  -h $HOSTNAME   -p 4181:4181 -p $port:8080 -p 7081:7081 -p 55436:55436 -p 8009:8009 -p 8993:8993 -p 8909:8909 $_DOCKER_IMAGE  /opt/blackduck/maiastra/start.sh"
+    STARTUP_CMD="docker run -t -i  -h $HOSTNAME   -p 4181:4181 -p $_HUB_PORT:8080 -p 7081:7081 -p 55436:55436 -p 8009:8009 -p 8993:8993 -p 8909:8909 $_DOCKER_IMAGE  /opt/blackduck/maiastra/start.sh -d"
     echo $STARTUP_CMD
     $STARTUP_CMD
 fi
+
+echo  -e "\033[5m \033[4m \033[1murls connect to the dockerized hub : \033[0m"
+declare -a urls=($(VBoxManage showvminfo boot2docker-vm | grep NIC | grep hub | awk '{print "http://" $13 ":"  $17}' | sed 's/,//g'))
+for url in "${urls[@]}"
+do
+   echo $url
+done
