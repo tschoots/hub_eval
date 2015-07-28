@@ -3,7 +3,7 @@
 port=8080
 
 
-#find all the hub routes and delete them
+#find all the boot2docker port forwarding routes and delete them
 declare -a routes_to_remove=($(VBoxManage showvminfo boot2docker-vm | grep NIC | grep hub | awk '{print $6}' | sed 's/,//g'))
 for r in "${routes_to_remove[@]}"
 do
@@ -17,11 +17,9 @@ declare -a ipAddresses=($(netstat -p tcp | grep "ESTABLISHED" | awk '{print $4}'
 i=0
 for ip in "${ipAddresses[@]}"
 do
-  echo $ip
+  # make the port forwarding rules to be set in boot2docker-vm
   r1="VBoxManage modifyvm boot2docker-vm --natpf1 hub${i},tcp,${ip},${port},,${port}"
-  dr1="VBoxManage modifyvm boot2docker-vm --natpf1 delete hub${i}"
   r2="VBoxManage modifyvm boot2docker-vm --natpf1 hub_console${i},tcp,${ip},7081,,7081"
-  dr2="VBoxManage modifyvm boot2docker-vm --natpf1 delete hub_console${i}"
   echo $r1
   `$r1`
   echo $r2
