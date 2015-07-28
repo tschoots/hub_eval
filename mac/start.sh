@@ -10,6 +10,31 @@ _DEFAULT_PORT=8080  # the default port on the mac host can be manipulated with -
 _HUB_PORT=5555      # the port that will be exposed on the boot2docker-vm and connected to port 8080 in the hub docker container , can't manipulate
 
 
+function printUrls {
+   echo  -e "\033[5m \033[4m \033[1murls connect to the dockerized hub : \033[0m"
+   declare -a urls=($(VBoxManage showvminfo boot2docker-vm | grep NIC | grep hub | awk '{print "http://" $13 ":"  $17}' | sed 's/,//g'))
+   for url in "${urls[@]}"
+   do
+      echo $url
+   done
+}
+
+
+# before doing anything see if dockerized container is already running.
+status=$(boot2docker status)
+echo "status docker " $status
+if [ "$status" == "running" ]; then
+   #check if the hub is already running.
+   eval $(boot2docker shellinit)
+   running_containers=$(docker ps  | grep $_DOCKER_IMAGE | wc -l)
+   if [ $running_containers -gt 0 ]; then
+      echo "dockerized hub already running"
+      printUrls
+      exit
+   fi
+fi
+
+
 port=$_DEFAULT_PORT
 
 max_mem=$(sysctl hw.memsize | awk '{print $2}')
@@ -103,12 +128,7 @@ done
 
 
 # print the urls to use to connect to the hub
-echo  -e "\033[5m \033[4m \033[1murls connect to the dockerized hub : \033[0m"
-declare -a urls=($(VBoxManage showvminfo boot2docker-vm | grep NIC | grep hub | awk '{print "http://" $13 ":"  $17}' | sed 's/,//g'))
-for url in "${urls[@]}"
-do
-   echo $url
-done
+printUrls
 
 
 #start the boot2docker-vm
@@ -144,7 +164,6 @@ if [ $nr_containers -gt 1 ]; then
     done
 fi
 
-nr_containers=$(docker ps -a | grep $_DOCKER_IMAGE | wc -l)
 if [ $nr_containers = 1 ]; then
     # dockerized hub started and stopped start the container again.
     container_id=$(docker ps -a | grep $_DOCKER_IMAGE | awk '{print $1;}')
@@ -160,9 +179,4 @@ if [ $nr_containers = 0 ]; then
     $STARTUP_CMD
 fi
 
-echo  -e "\033[5m \033[4m \033[1murls connect to the dockerized hub : \033[0m"
-declare -a urls=($(VBoxManage showvminfo boot2docker-vm | grep NIC | grep hub | awk '{print "http://" $13 ":"  $17}' | sed 's/,//g'))
-for url in "${urls[@]}"
-do
-   echo $url
-done
+printUrls
