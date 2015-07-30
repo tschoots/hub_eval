@@ -19,4 +19,6 @@ VBoxManage modifyvm "boot2docker-vm" --natpf1 delete "hub01"\
 \
 #active ip addresses\
 netstat -p tcp | grep "ESTABLISHED" | awk '\{print $4\}' | sed 's/\\./ /g' | awk '\{print $1 "." $2 "." $3 "." $4\}' | uniq\
-netstat -p tcp | grep "ESTABLISHED" | awk '\{print $4\}' | sed 's/\\./ /g' | awk '\{print $1 "." $2 "." $3 "." $4\}' | uniq | wc -l}
+netstat -p tcp | grep "ESTABLISHED" | awk '\{print $4\}' | sed 's/\\./ /g' | awk '\{print $1 "." $2 "." $3 "." $4\}' | uniq | wc -l\
+\
+docker run with -h hostname then console will work!!!}

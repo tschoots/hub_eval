@@ -1,6 +1,9 @@
 #!/bin/bash
 _DOCKER_IMAGE="docker.io/blackduckhub/eval:latest"
 
+# get the environment in place
+eval $(boot2docker shellinit)
+
 # get the running container id of the hub container
 container_id=$(docker ps | grep $_DOCKER_IMAGE | awk '{print $1;}')
 

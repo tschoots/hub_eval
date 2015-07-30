@@ -12,6 +12,11 @@ _HUB_PORT=5555      # the port that will be exposed on the boot2docker-vm and co
 
 function printUrls {
    echo  -e "\033[5m \033[4m \033[1murls connect to the dockerized hub : \033[0m"
+   declare -a ports=($(VBoxManage showvminfo boot2docker-vm | grep NIC | grep hub | awk '{print   $17}' | sed 's/,//g' | uniq))
+   for port in "${ports[@]}"
+   do
+      echo "http://"${HOSTNAME}":"$port
+   done
    declare -a urls=($(VBoxManage showvminfo boot2docker-vm | grep NIC | grep hub | awk '{print "http://" $13 ":"  $17}' | sed 's/,//g'))
    for url in "${urls[@]}"
    do
@@ -19,20 +24,23 @@ function printUrls {
    done
 }
 
+function checkHubRunning {
+   # before doing anything see if dockerized container is already running.
+   status=$(boot2docker status)
+  echo "status docker " $status
+  if [ "$status" == "running" ]; then
+     #check if the hub is already running.
+     eval $(boot2docker shellinit)
+     running_containers=$(docker ps  | grep $_DOCKER_IMAGE | wc -l)
+     if [ $running_containers -gt 0 ]; then
+        echo "dockerized hub already running"
+        printUrls
+        exit
+     fi
+  fi
+}
 
-# before doing anything see if dockerized container is already running.
-status=$(boot2docker status)
-echo "status docker " $status
-if [ "$status" == "running" ]; then
-   #check if the hub is already running.
-   eval $(boot2docker shellinit)
-   running_containers=$(docker ps  | grep $_DOCKER_IMAGE | wc -l)
-   if [ $running_containers -gt 0 ]; then
-      echo "dockerized hub already running"
-      printUrls
-      exit
-   fi
-fi
+
 
 
 port=$_DEFAULT_PORT
@@ -59,7 +67,7 @@ case $i in
    -m=*|--memory=*)
    memInput="${i#*=}"
    if [ $memInput -lt $max_mem ]; then
-      mem=$(memInput)
+      mem=$memInput
    else
       echo "ERROR 75% of total memory : $max_mem, this is less than input $memInput mb"
       exit
@@ -78,6 +86,8 @@ case $i in
    ;;
 esac
 done
+
+checkHubRunning
 
 # check port if we have to start with sudo rights
    if [[ "$port" -lt 1024 ]]; then
@@ -98,7 +108,9 @@ if [ "$status" == "running" ]; then
 fi
 
 # Set the container memory
-VBoxManage modifyvm boot2docker-vm --memory $mem
+mem_set_cmd="VBoxManage modifyvm boot2docker-vm --memory ${mem}"
+echo $mem_set_cmd
+`$mem_set_cmd`
 
 ## now start working to the port forwarding.
 
