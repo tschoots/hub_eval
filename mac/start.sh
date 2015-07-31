@@ -5,7 +5,8 @@
 # minumum requirement is 8 gb of ram wich will be allocated in the boot2docker-vm
 
 _DOCKER_IMAGE="docker.io/blackduckhub/eval:latest"
-_MIN_MEM=8192
+#_MIN_MEM=8192
+_MIN_MEM=4096
 _DEFAULT_PORT=8080  # the default port on the mac host can be manipulated with --port= during startup
 _HUB_PORT=5555      # the port that will be exposed on the boot2docker-vm and connected to port 8080 in the hub docker container , can't manipulate
 
@@ -35,9 +36,27 @@ function checkHubRunning {
      if [ $running_containers -gt 0 ]; then
         echo "dockerized hub already running"
         printUrls
+        startBrowser
         exit
      fi
   fi
+}
+
+function startBrowser {
+  declare -a ports=($(VBoxManage showvminfo boot2docker-vm | grep NIC | grep hub | awk '{print   $17}' | sed 's/,//g' | uniq))
+   for port in "${ports[@]}"
+   do
+      url=$(echo "http://"${HOSTNAME}":"$port)
+      if [ -f /Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome ];then
+        open -a "Google Chrome" $url
+      elif [ -f /Applications/Firefox.app/Contents/MacOS/firefox ];then
+        open -a Firefox $url
+      elif [ -f /Applications/Safari.app/Contents/MacOS/Safari ];then
+        open -a safari $url
+      else
+        echo "no browser found"
+      fi
+   done
 }
 
 
@@ -209,9 +228,11 @@ fi
 if [ $nr_containers = 0 ]; then
     #no containers started so start the image
     echo "first time image is started"
-    STARTUP_CMD="docker run -t -i  -h $HOSTNAME   -p 4181:4181 -p $_HUB_PORT:8080 -p 7081:7081 -p 55436:55436 -p 8009:8009 -p 8993:8993 -p 8909:8909 $_DOCKER_IMAGE  /opt/blackduck/maiastra/start.sh -d"
+    STARTUP_CMD="docker run -t -i -d  -h $HOSTNAME   -p 4181:4181 -p $_HUB_PORT:8080 -p 7081:7081 -p 55436:55436 -p 8009:8009 -p 8993:8993 -p 8909:8909 $_DOCKER_IMAGE  /opt/blackduck/maiastra/start.sh -d"
     echo $STARTUP_CMD
     $STARTUP_CMD
 fi
 
 printUrls
+
+startBrowser
