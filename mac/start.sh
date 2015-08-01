@@ -230,7 +230,7 @@ fi
 if [ $nr_containers = 0 ]; then
     #no containers started so start the image
     echo "first time image is started"
-    STARTUP_CMD="docker run -t -i -d  -h $HOSTNAME   -p 4181:4181 -p $_HUB_PORT:8080 -p 7081:7081 -p 55436:55436 -p 8009:8009 -p 8993:8993 -p 8909:8909 $_DOCKER_IMAGE  /opt/blackduck/maiastra/start.sh -d"
+    STARTUP_CMD="docker run -t -i -d  -h $HOSTNAME --name=blackduck_hub  -p 4181:4181 -p $_HUB_PORT:8080 -p 7081:7081 -p 55436:55436 -p 8009:8009 -p 8993:8993 -p 8909:8909 $_DOCKER_IMAGE  /opt/blackduck/maiastra/start.sh"
     echo $STARTUP_CMD
     $STARTUP_CMD
 fi
