@@ -86,8 +86,10 @@ max_mem=$(awk "BEGIN {printf \"%.0f\", $(($max_mem / 1048576))*0.75}")  # take 7
 echo $max_mem
 if [ $free_mem_mb -lt $max_mem ];then
    mem=$free_mem_mb
-   echo "available memory : " $mem
+else
+   mem=$max_mem
 fi
+echo "available memory : " $mem
 
 cpus=$(sysctl kern.aioprocmax | awk '{print $2}')
 max_cpus=$(awk "BEGIN {printf \"%.0f\", $(($cpus))*0.5}")  # take 75% of total memory
