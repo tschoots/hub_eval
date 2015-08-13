@@ -31,5 +31,17 @@ fi
 cd $_REPO_DIR/rest-backend
 ./gradlew -Dappmgr.artifactory.url=http://artifactory.blackducksoftware.com:8081/artifactory/bds-deployment-test/ build uploadArchives -x test --rerun-tasks
 
-#cd $_REPO_DIR/appmgr
-#./gradlew -Dappmgr.artifactory.url=http://artifactory.blackducksoftware.com:8081/artifactory/bds-deployment-test/ build uploadArchives -x test --rerun-tasks
+cd $_REPO_DIR/appmgr
+./gradlew -Dappmgr.artifactory.url=http://artifactory.blackducksoftware.com:8081/artifactory/bds-deployment-test/ build uploadArchives -x test --rerun-tasks
+
+
+cd $_REPO_DIR/rest-backend
+./gradlew -Dappmgr.artifactory.url=http://artifactory.blackducksoftware.com:8081/artifactory/bds-deployment-test/ build uploadArchives -x test --rerun-tasks -DuseLocalRepo
+
+
+cd $_REPO_DIR/rest-backend
+./gradlew -PuseLocalRepo -Dappmgr.artifactory.url=http://artifactory.blackducksoftware.com:8081/artifactory/bds-deployment-test/ -c ./appmgr.settings.gradle build uploadArchives -x test -x :appmgr:appmgr.hubinstall.client:fatJar --rerun-tasks
+
+
+# now the installer is at the following place
+# $_REPO_DIR/rest-backend/appmgr/appmgr.hubinstall/build/distributions/appmgr.hubinstall-2.4.0-SNAPSHOT.zip
