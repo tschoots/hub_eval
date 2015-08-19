@@ -77,6 +77,7 @@ fi
 
 yum -c "$yum_config" --installroot="$target" --releasever=/ --setopt=tsflags=nodocs \
     --setopt=group_package_types=mandatory -y groupinstall Core
+yum -c "$yum_config" --installroot="$target" -y install hostname nc libcap nmap-ncat tar passwd redhat-lsb-core 
 yum -c "$yum_config" --installroot="$target" -y clean all
 
 cat > "$target"/etc/sysconfig/network <<EOF
@@ -87,7 +88,35 @@ EOF
 # effectively: febootstrap-minimize --keep-zoneinfo --keep-rpmdb
 # --keep-services "$target". Stolen from mkimgage-rinse.sh
 # locales
-rm -rf "$target
+rm -rf "$target"/usr/{{lib,share}/locale,{lib,lib64}/gconv,bin/localedef,sbin/build-locale-archive}
+# docs
+rm -rf "$target"/usr/share/{man,doc,info,gnome/help}
+# cracklib
+rm -rf "$target"/usr/share/cracklib
+# i18n
+rm -rf "$target"/usr/share/i18n
+# sln
+rm -rf "$target"/sbin/sln
+# ldconfig
+rm -rf "$target"/etc/ld.so.conf.d
+rm -rf "$target"/var/cache/ldconfig/*
 
-#rm -rf "$target"
+version=
+for file in "$target"/etc/{redhat,system}-release
+do
+  if [ -r "$file" ]; then
+   version="$(sed 's/^[^0-9\]*\([0-9.]\+\).*$/\1/' "$file")" 
+  fi
+done
+
+if [ -z "$version" ]; then
+  echo >&2 "warning: cannot autodetect OS version, using '$name' as tag"
+fi
+
+tar --numeric-owner -c -C "$target" . | docker import - $name
+docker run -i -t --rm $name echo success
+
+
+
+rm -rf "$target"
 echo "$target"
