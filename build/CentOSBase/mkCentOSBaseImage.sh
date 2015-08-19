@@ -79,5 +79,15 @@ yum -c "$yum_config" --installroot="$target" --releasever=/ --setopt=tsflags=nod
     --setopt=group_package_types=mandatory -y groupinstall Core
 yum -c "$yum_config" --installroot="$target" -y clean all
 
+cat > "$target"/etc/sysconfig/network <<EOF
+NETWORKING=yes
+HOSTNAME=localhost.localdomain
+EOF
+
+# effectively: febootstrap-minimize --keep-zoneinfo --keep-rpmdb
+# --keep-services "$target". Stolen from mkimgage-rinse.sh
+# locales
+rm -rf "$target
+
 #rm -rf "$target"
 echo "$target"
