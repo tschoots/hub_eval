@@ -49,10 +49,17 @@ else
    cd $_REPO_DIR
    git clone http://tschoots@stash.blackducksoftware.com/scm/hub/rest-backend.git
    cd $_REPO_DIR/rest-backend
-   git checkout -b dev/HUB-3111 origin/dev/HUB-3111
+   #git checkout -b dev/HUB-3111 origin/dev/HUB-3111
+   #git checkout -b dev/HUB-3111_2_3_x origin/dev/HUB-3111_2_3_x
+   git checkout -b release/MM_2_3_x origin/release/MM_2_3_x
 fi
 
-rm -rf $_HOME_DIR/.m2
+#rm -rf $_HOME_DIR/.m2
+rm -rf $_HOME_DIR/.m2/repository/com/blackducksoftware/hub/scan.cli/2.4.0-SNAPSHOT
+rm -rf $_HOME_DIR/.m2/repository/com/blackducksoftware/hub/job.standalone/2.4.0-SNAPSHOT
+rm -rf $_HOME_DIR/.gradle/caches/modules-2/files-2.1/com.oracle.java/jre/1.7.0_80/356128907fb5c97c22724fc043c8a6195cde4d8
+rm -rf $_HOME_DIR//repos/hub/rest-backend/appmgr/appmgr.hublayout/build/tmp/expandedArchives/jre-1.7.0_80-linux-x64.zip_bx30hrcau7ywc8tgsbx7li36v
+
 
 cd $_REPO_DIR/rest-backend
 ./gradlew -Dappmgr.artifactory.url=http://artifactory.blackducksoftware.com:8081/artifactory/bds-deployment-test/ build uploadArchives -x test --rerun-tasks
@@ -74,4 +81,4 @@ cd $_REPO_DIR/rest-backend
 
 # find the installer
 installerPath=$(getInstallerPath)
-./createDockerImage.sh $installerPath
+#./createDockerImage.sh $installerPath
