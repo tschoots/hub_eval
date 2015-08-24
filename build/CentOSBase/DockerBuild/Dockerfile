@@ -36,12 +36,14 @@ RUN mkdir -p /opt/blackduck && chown blckdck:blckdck /opt/blackduck   \
 USER blckdck
 # the following is specifically set for dev purposes
 ENV  APPMGR_HUBINSTALL_OPTS "-Dlog4j.configuration=verbose-log4j.properties -DartifactoryURL=http://artifactory.blackducksoftware.com:8081 -DartifactoryPrefix=artifactory -DartifactoryRepo=bds-deployment-test"
+ENV  HUB_INSTALLER "hubInstaller-2.3.0-SNAPSHOT-amd64.zip"
 RUN  mkdir -p /tmp/hubinstall
 COPY silentInstall.properties /tmp/hubinstall/silentInstall.properties
-COPY hubInstaller-2.4.0-SNAPSHOT-amd64.zip /tmp/hubinstall/hubInstaller-2.4.0-SNAPSHOT-amd64.zip
-RUN  cd /tmp/hubinstall && unzip ./hubInstaller-2.4.0-SNAPSHOT-amd64.zip \
-       && cd /tmp/hubinstall/appmgr.hubinstall-2.4.0-SNAPSHOT/bin/  \
-       && ./appmgr.hubinstall -sf /tmp/hubinstall/silentInstall.properties
+COPY $HUB_INSTALLER /tmp/hubinstall/$HUB_INSTALLER
+RUN  cd /tmp/hubinstall && unzip ./$HUB_INSTALLER \
+       && find /tmp/hubinstall/ -name "appmgr.hubinstall" -exec  {} -sf /tmp/hubinstall/silentInstall.properties \;
+#       && cd /tmp/hubinstall/appmgr.hubinstall-2.4.0-SNAPSHOT/bin/  \
+#       && ./appmgr.hubinstall -sf /tmp/hubinstall/silentInstall.properties
 
 
 
