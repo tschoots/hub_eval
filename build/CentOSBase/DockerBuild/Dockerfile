@@ -1,4 +1,4 @@
-FROM hubeval:latest
+FROM centos:latest
 MAINTAINER Ton Schoots <ton@maiastra.com>
 
 RUN set -x
